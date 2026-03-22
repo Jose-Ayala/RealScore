@@ -218,6 +218,21 @@ h1,
   color: var(--rs-muted);
 }
 
+.stress-group {
+  border: 1px solid color-mix(in srgb, var(--rs-blue) 40%, var(--rs-border));
+  background: color-mix(in srgb, var(--rs-accent-soft) 36%, #ffffff);
+}
+
+:root[data-theme="dark"] .stress-group {
+  background: color-mix(in srgb, var(--rs-accent-soft) 58%, #0b1118);
+  border-color: color-mix(in srgb, #5ea8ea 42%, var(--rs-border));
+}
+
+.stress-dependent:disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
 .score-wrap {
   display: flex;
   align-items: center;

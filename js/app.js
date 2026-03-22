@@ -388,6 +388,12 @@ function applyMarketFilter() {
 	el.dataStatus.textContent = `Loaded ${marketNames.length} markets | Showing ${filtered.length}.`;
 }
 
+function syncStressInputs() {
+	const enabled = el.stressToggle.checked;
+	el.vacancyShock.disabled = !enabled;
+	el.rentShock.disabled = !enabled;
+}
+
 function resetInputs() {
 	el.listingPrice.value = DEFAULTS.listingPrice;
 	el.expenseRatio.value = DEFAULTS.expenseRatio;
@@ -398,6 +404,7 @@ function resetInputs() {
 	el.stressToggle.checked = DEFAULTS.stressToggle;
 	el.marketSearch.value = DEFAULTS.marketSearch;
 	el.undervaluedOnly.checked = DEFAULTS.undervaluedOnly;
+	syncStressInputs();
 	applyMarketFilter();
 	render();
 }
@@ -481,6 +488,9 @@ function initInputs() {
 		if (input === el.marketSearch || input === el.undervaluedOnly || input === el.listingPrice) {
 			applyMarketFilter();
 		}
+		if (input === el.stressToggle) {
+			syncStressInputs();
+		}
 		render();
 	}));
 
@@ -559,5 +569,6 @@ async function initData() {
 
 el.year.textContent = new Date().getFullYear();
 initInputs();
+syncStressInputs();
 initTooltips();
 initData();

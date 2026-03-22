@@ -30,7 +30,7 @@
     <header class="container py-3">
       <nav class="navbar navbar-expand-lg glass-panel rounded-4 px-3 px-md-4">
         <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
-          <img src="img/logo-256.png" alt="RealScore" class="brand-logo" />
+          <img src="img/logo-256.png" data-light-src="img/logo-256.png" data-dark-src="img/logo-dark-256.png" alt="RealScore" class="brand-logo" />
           <span class="brand-wordmark">RealScore</span>
         </a>
         <div class="d-flex align-items-center gap-2 ms-auto">
@@ -147,7 +147,15 @@
     <script>
       (function applySavedTheme() {
         var savedTheme = localStorage.getItem("realscore-theme");
-        document.documentElement.setAttribute("data-theme", savedTheme === "dark" ? "dark" : "light");
+        var theme = savedTheme === "dark" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", theme);
+        var isDark = theme === "dark";
+        document.querySelectorAll("img[data-light-src][data-dark-src]").forEach(function (img) {
+          var target = isDark ? img.dataset.darkSrc : img.dataset.lightSrc;
+          if (target && img.getAttribute("src") !== target) {
+            img.setAttribute("src", target);
+          }
+        });
       })();
     </script>
   </body>

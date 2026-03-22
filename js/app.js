@@ -64,13 +64,25 @@ const DEFAULTS = {
 	undervaluedOnly: false
 };
 
+function applyThemeLogos(theme) {
+	const isDark = theme === "dark";
+	document.querySelectorAll("img[data-light-src][data-dark-src]").forEach((img) => {
+		const targetSrc = isDark ? img.dataset.darkSrc : img.dataset.lightSrc;
+		if (targetSrc && img.getAttribute("src") !== targetSrc) {
+			img.setAttribute("src", targetSrc);
+		}
+	});
+}
+
 function applyTheme(theme) {
 	root.setAttribute("data-theme", theme);
 
 	const isDark = theme === "dark";
 	toggle.setAttribute("aria-pressed", String(isDark));
 	toggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+	toggle.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
 	toggleLabel.textContent = isDark ? "Light Mode" : "Dark Mode";
+	applyThemeLogos(theme);
 }
 
 const savedTheme = localStorage.getItem(THEME_KEY);

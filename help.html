@@ -74,8 +74,11 @@
         <h3 class="help-section-title mb-1">Listing Price</h3>
         <p class="mb-2">The purchase price used for valuation and return calculations. This directly affects discount/premium versus ZHVI and cap rate.</p>
 
+        <h3 class="help-section-title mb-1">Monthly Rent Override (Optional)</h3>
+        <p class="mb-2">Enter this when you know the property's current or likely rent. If left blank, RealScore uses metro ZORI as the rent baseline.</p>
+
         <h3 class="help-section-title mb-1">Expense Ratio</h3>
-        <p class="mb-2">Estimated operating expenses as a percent of rent (maintenance, insurance, property taxes, etc.). Higher values lower NOI and returns.</p>
+        <p class="mb-2">Estimated operating expenses as a percent of rent. This typically includes taxes, insurance, maintenance, management, owner-paid utilities, and turnover/leasing reserve. Mortgage payments are handled separately in the financing inputs.</p>
 
         <h3 class="help-section-title mb-1">Down Payment + Interest Rate</h3>
         <p class="mb-2">Used to compute annual debt service and cash-on-cash return. More down payment usually improves cash-on-cash stability.</p>
@@ -105,7 +108,7 @@
         <p class="mb-2">A modeled low-to-high return range using income plus forecast appreciation (ZHVF).</p>
 
         <h3 class="help-section-title mb-1">Projected Monthly Rent</h3>
-        <p class="mb-0">Based on metro ZORI, adjusted down when stress is active.</p>
+        <p class="mb-0">Uses your Monthly Rent Override when provided; otherwise defaults to metro ZORI. The displayed value is adjusted down when stress is active.</p>
       </section>
 
       <section class="glass-panel rounded-4 p-3 p-md-4 mb-3">
@@ -122,8 +125,9 @@
 
       <section class="glass-panel rounded-4 p-3 p-md-4 mb-3">
         <h2 class="h5 mb-3">5) Scenario Snapshot Chart</h2>
-        <p class="mb-2">The chart compares Base and Stress values side-by-side for Cap Rate, Cash-on-Cash, and IRR midpoint.</p>
-        <p class="mb-2">Use it to quickly judge downside sensitivity before committing to a market or price.</p>
+        <p class="mb-2">This chart is a quick downside sensitivity check for your deal assumptions.</p>
+        <p class="mb-2">It compares Base and Stress values side-by-side for Cap Rate, Cash-on-Cash, and IRR midpoint so you can see how resilient returns remain under pressure.</p>
+        <p class="mb-2">Larger gaps between Base and Stress bars signal greater downside exposure.</p>
       </section>
 
       <section class="glass-panel rounded-4 p-3 p-md-4 mb-3">

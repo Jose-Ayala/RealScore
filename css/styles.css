@@ -218,6 +218,42 @@ h1,
   color: var(--rs-muted);
 }
 
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.form-tooltip-wrap {
+  position: relative;
+}
+
+.info-btn-inline {
+  width: 1.2rem;
+  height: 1.2rem;
+  font-size: 0.7rem;
+  flex: 0 0 auto;
+}
+
+.form-tooltip-wrap .help-tooltip {
+  top: 1.9rem;
+  right: 0;
+  width: min(320px, calc(100% - 0.5rem));
+}
+
+#optionalMonthlyRent::placeholder {
+  font-size: 0.84rem;
+}
+
+.input-help {
+  color: var(--rs-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .stress-group {
   border: 1px solid color-mix(in srgb, var(--rs-blue) 40%, var(--rs-border));
   background: color-mix(in srgb, var(--rs-accent-soft) 36%, #ffffff);
@@ -282,6 +318,49 @@ h1,
   background: color-mix(in srgb, var(--rs-panel) 88%, #ffffff);
   border-radius: 0.9rem;
   padding: 0.75rem;
+}
+
+.scenario-panel {
+  border-color: color-mix(in srgb, var(--rs-blue) 35%, var(--rs-border));
+}
+
+.scenario-purpose {
+  color: var(--rs-muted);
+  font-size: 0.97rem;
+  line-height: 1.45;
+}
+
+.scenario-caption {
+  color: var(--rs-muted);
+  font-size: 0.88rem;
+  margin-top: 0.8rem;
+}
+
+.scenario-live-status {
+  color: var(--rs-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0.72rem;
+}
+
+.scenario-live-status-emphasis {
+  color: color-mix(in srgb, #ffd24d 90%, var(--rs-ink));
+  font-weight: 700;
+}
+
+.scenario-chart-wrap {
+  min-height: 240px;
+  padding: 1rem;
+}
+
+.scenario-chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.scenario-panel.is-stress-active {
+  border-color: color-mix(in srgb, var(--rs-orange) 52%, var(--rs-border));
+  box-shadow: 0 0 0 0.18rem rgba(242, 176, 92, 0.16);
 }
 
 #dataStatus {
@@ -414,6 +493,10 @@ h1,
   background: rgba(16, 30, 45, 0.8);
 }
 
+:root[data-theme="dark"] .scenario-panel.is-stress-active {
+  box-shadow: 0 0 0 0.18rem rgba(242, 176, 92, 0.2);
+}
+
 :root[data-theme="dark"] .form-control::placeholder {
   color: #9ab2c7;
 }
@@ -430,6 +513,13 @@ h1,
   color: var(--rs-blue);
 }
 
+.metric-source {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--rs-muted);
+  font-size: 0.74rem;
+}
+
 .footer-note {
   color: var(--rs-muted);
 }
@@ -441,6 +531,22 @@ h1,
 
   .hero-logo-wrap {
     padding: 0.75rem;
+  }
+
+  .scenario-chart-wrap {
+    min-height: 220px;
+    padding: 0.85rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .scenario-panel {
+    padding: 1.5rem !important;
+  }
+
+  .scenario-chart-wrap {
+    min-height: 250px;
+    padding: 1.1rem;
   }
 }
 

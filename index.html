@@ -94,7 +94,18 @@
               </div>
 
               <div class="col-12 col-md-6">
-                <label for="expenseRatio" class="form-label">Expense Ratio (%)</label>
+                <label for="optionalMonthlyRent" class="form-label">Monthly Rent ($)</label>
+                <input id="optionalMonthlyRent" class="form-control" type="number" min="1" step="50" placeholder="Leave blank to use metro ZORI value" />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="form-label-row form-tooltip-wrap">
+                  <label for="expenseRatio" class="form-label mb-0">Expense Ratio (%)</label>
+                  <button class="info-btn info-btn-inline" type="button" aria-label="What does Expense Ratio include?" aria-expanded="false" data-tooltip-target="tipExpenseRatio">i</button>
+                  <div id="tipExpenseRatio" class="help-tooltip" role="tooltip">
+                    Operating expenses as a percent of rent: taxes, insurance, maintenance, management, owner-paid utilities, and turnover reserve. Mortgage payment is excluded.
+                  </div>
+                </div>
                 <input id="expenseRatio" class="form-control" type="number" min="0" max="100" step="1" value="35" />
               </div>
 
@@ -170,6 +181,7 @@
                 <article class="metric-card p-3 rounded-4 h-100">
                   <p class="metric-label mb-1">Projected Monthly Rent</p>
                   <p id="rentOut" class="metric-value mb-0">--</p>
+                  <small id="rentSourceOut" class="metric-source">Source: Metro ZORI benchmark</small>
                 </article>
               </div>
 
@@ -251,12 +263,19 @@
         </div>
       </section>
 
-      <section class="mt-3">
-        <div class="glass-panel rounded-4 p-3 p-md-4">
-          <h2 class="h6 mb-3">Scenario Snapshot</h2>
-          <div class="chart-wrap">
-            <canvas id="scenarioChart" height="120"></canvas>
+      <section class="mt-3" id="scenarioSnapshotSection" role="region" aria-labelledby="scenarioSnapshotTitle" aria-describedby="scenarioPurpose scenarioLiveStatus scenarioCaption">
+        <div id="scenarioSnapshotPanel" class="glass-panel rounded-4 p-3 p-md-4 scenario-panel">
+          <h2 id="scenarioSnapshotTitle" class="h4 mb-2">Scenario Snapshot</h2>
+          <p id="scenarioPurpose" class="scenario-purpose mb-3">
+            This chart compares base-case and stressed returns so you can quickly judge downside sensitivity before making a decision.
+          </p>
+          <div class="chart-wrap scenario-chart-wrap">
+            <canvas id="scenarioChart" height="220" aria-label="Base versus stress comparison for cap rate, cash-on-cash return, and IRR midpoint"></canvas>
           </div>
+          <p id="scenarioLiveStatus" class="scenario-live-status mb-0" aria-live="polite">Stress assumptions inactive.</p>
+          <p id="scenarioCaption" class="scenario-caption mb-0">
+            Compare bar height by metric: bigger gaps between Base and Stress indicate greater downside exposure.
+          </p>
         </div>
       </section>
 

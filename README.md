@@ -1,6 +1,6 @@
 # RealScore MVP
 
-A browser-only real estate investment decision-support tool. Select a US metro area, enter property details, and instantly see a Deal Score backed by live Zillow data — no backend, no account required.
+A browser-only real estate investment decision-support tool. Select a US metro area, enter property details, and instantly see a Deal Score backed by Zillow metro datasets loaded in-browser — no backend, no account required. When available, you can also enter a deal-level Monthly Rent value instead of relying only on the metro rent benchmark.
 
 ---
 
@@ -39,7 +39,9 @@ All five Zillow dataset files must be present in the `Datasets/` folder before s
 ```
 RealScore/
 ├── index.html               # Single-page app shell and all markup
+├── help.html                # In-app user guide page (linked from navbar Help icon)
 ├── manifest.webmanifest     # PWA install metadata
+├── .gitignore               # Excludes development-only folders (e.g., Documents/)
 ├── css/
 │   └── styles.css           # Custom design system on top of Bootstrap
 ├── js/
@@ -47,6 +49,8 @@ RealScore/
 ├── img/
 │   ├── logo.png             # Master logo (2816 × 1536 px)
 │   ├── logo-128/256/512.png # Web-optimized logo variants
+│   ├── logo-dark.jpg        # Dark-theme source logo
+│   ├── logo-dark-128/256/512.png # Dark-theme logo variants used in UI
 │   ├── icon-192.png         # PWA icon (square, white bg)
 │   └── icon-512.png         # PWA icon (square, white bg)
 ├── Datasets/
@@ -69,7 +73,7 @@ All five Zillow metro-level CSVs are loaded and parsed entirely in the browser �
 | Key | Zillow Dataset | What it provides |
 |-----|---------------|-----------------|
 | `zhvi` | Zillow Home Value Index (ZHVI) | Smoothed, seasonally adjusted median home value for mid-tier SFR+condo. Used as the market benchmark price. |
-| `zori` | Zillow Observed Rent Index (ZORI) | Smoothed median asking rent (SFR+condo+multifamily). Used as the projected monthly rent. |
+| `zori` | Zillow Observed Rent Index (ZORI) | Smoothed median asking rent (SFR+condo+multifamily). Used as the default monthly rent benchmark when a deal-level rent override is not entered. |
 | `zhvf` | Zillow Home Value Forecast (ZHVF) | 12-month forward price growth percentage. Used to estimate appreciation in the IRR calculation. |
 | `invt` | For-Sale Inventory | Count of active listings. Used in the Risk Score as a supply-side signal. |
 | `pending` | Mean Days to Pending | Median days from listing to pending. Used in the Risk Score as a demand-side signal. |
@@ -168,7 +172,15 @@ NOI = annualRent × (1 − expenseRatio) × (1 − vacancyShock if stress)
 capRate = NOI / listingPrice
 ```
 
-`annualRent` is `monthlyRent × 12`, where `monthlyRent` is ZORI (reduced by `rentShock` if stress is active). `expenseRatio` covers operating expenses as a percentage of gross rent (default 35%).
+`annualRent` is `monthlyRent × 12`, where `monthlyRent` uses this precedence:
+- user-entered Monthly Rent Override (if provided and positive), otherwise
+- metro ZORI benchmark.
+
+Stress mode applies `rentShock` to whichever monthly rent source is active.
+
+`expenseRatio` covers operating expenses as a percentage of gross rent (default 35%), such as taxes, insurance, maintenance, management, owner-paid utilities, and turnover reserve. Mortgage payments are modeled separately through debt service.
+
+The UI also displays the selected rent source so it is clear whether the output is based on user-entered rent or the metro benchmark.
 
 ### Cash-on-Cash Return
 
@@ -210,14 +222,14 @@ Enabling the **Stress Test** toggle applies four simultaneous shocks to the mode
 
 | Parameter | Default | Stress effect |
 |-----------|---------|---------------|
-| Monthly rent | ZORI | Reduced by `rentShock` % (default −10%) |
+| Monthly rent | Monthly Rent Override or ZORI | Reduced by `rentShock` % (default −10%) |
 | Vacancy | 0% | `vacancyShock` % applied to NOI (default +5%) |
 | IRR band | ±2.5% / ±1.5% | Narrows and shifts down (±2.5% low / ±1.5% high) |
 | Risk Score | Raw | −10 point flat penalty |
 
-`rentShock` and `vacancyShock` are user-adjustable in the inputs panel before flipping the toggle.
+`rentShock` and `vacancyShock` are grouped under **Apply stress scenario** and are enabled only when that toggle is on.
 
-The **Scenario Snapshot** chart always shows base and stress bars side-by-side regardless of which mode is active, so the impact is always visible.
+The **Scenario Snapshot** chart provides a downside sensitivity view that always shows base and stress bars side-by-side regardless of which mode is active, making return resilience and downside exposure easy to compare at a glance.
 
 ---
 
@@ -238,10 +250,10 @@ Both filters run through `applyMarketFilter()`, which rebuilds the `<select>` op
 |---------|---------|
 | **Navbar** | Logo, brand name, Help icon (opens in-app guide), dark/light mode toggle |
 | **Hero** | Tagline and hero logo |
-| **Deal Inputs** (left panel) | Market search + filter, metro selector, all underwriting assumptions |
+| **Deal Inputs** (left panel) | Market search + filter, metro selector, listing price, optional Monthly Rent, Expense Ratio, financing assumptions, and stress inputs |
 | **Decision Summary** (right panel) | Deal Score badge, score band, Cap Rate, CoC, IRR, Projected Rent, Score Breakdown bars |
 | **Baseline Data Cards** | ZHVI, ZORI, ZHVF, and Market Risk values for the selected metro, each with an info tooltip |
-| **Scenario Snapshot chart** | Chart.js bar chart comparing base vs. stress Cap Rate, CoC, and IRR |
+| **Scenario Snapshot chart** | Chart.js bar chart used as a quick downside sensitivity check by comparing base vs. stress Cap Rate, CoC, and IRR |
 | **Help Page** | Step-by-step usage guide for inputs, outputs, score interpretation, and workflow recommendations |
 | **Footer** | Compliance note and copyright year |
 
@@ -264,6 +276,8 @@ There is intentionally **no service worker** — offline caching is out of scope
 | Logic | Vanilla JavaScript (ES2020, no build step) |
 | Charts | Chart.js 4.4.3 (CDN) |
 | Fonts | Space Grotesk (headings), IBM Plex Sans (body) via Google Fonts |
-| Data | 5 Zillow metro CSV files, parsed in-browser |
+| Data Source | 5 Zillow metro CSV files |
+| Data Loading | Browser `fetch()` + custom RFC-4180 CSV parser |
 | PWA | Web App Manifest (no service worker) |
-| Theme | `data-theme` attribute on `<html>`, toggled via JS, persisted in `localStorage` |
+| Theme | `data-theme` attribute on `<html>`, toggled via JS, persisted in `localStorage`, with light/dark logo asset swapping |
+| Hosting | Static hosting (GitHub Pages compatible) |

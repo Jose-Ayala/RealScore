@@ -10,6 +10,7 @@ const el = {
 	undervaluedOnly: document.getElementById("undervaluedOnly"),
 	marketSelect: document.getElementById("marketSelect"),
 	listingPrice: document.getElementById("listingPrice"),
+	optionalMonthlyRent: document.getElementById("optionalMonthlyRent"),
 	expenseRatio: document.getElementById("expenseRatio"),
 	downPayment: document.getElementById("downPayment"),
 	interestRate: document.getElementById("interestRate"),
@@ -23,6 +24,7 @@ const el = {
 	cocOut: document.getElementById("cocOut"),
 	irrOut: document.getElementById("irrOut"),
 	rentOut: document.getElementById("rentOut"),
+	rentSourceOut: document.getElementById("rentSourceOut"),
 	zhviOut: document.getElementById("zhviOut"),
 	zoriOut: document.getElementById("zoriOut"),
 	zhvfOut: document.getElementById("zhvfOut"),
@@ -33,6 +35,8 @@ const el = {
 	valuationBar: document.getElementById("valuationBar"),
 	incomeBar: document.getElementById("incomeBar"),
 	riskBar: document.getElementById("riskBar"),
+	scenarioSnapshotPanel: document.getElementById("scenarioSnapshotPanel"),
+	scenarioLiveStatus: document.getElementById("scenarioLiveStatus"),
 	scenarioChart: document.getElementById("scenarioChart")
 };
 
@@ -54,6 +58,7 @@ const riskStats = {
 
 const DEFAULTS = {
 	listingPrice: 350000,
+	optionalMonthlyRent: "",
 	expenseRatio: 35,
 	downPayment: 25,
 	interestRate: 6.8,
@@ -244,13 +249,13 @@ function upsertScenarioChart(baseCase, stressCase) {
 				labels,
 				datasets: [
 					{
-						label: "Base",
+						label: "Base Scenario",
 						data: baseData,
 						backgroundColor: "rgba(12, 127, 228, 0.7)",
 						borderRadius: 8
 					},
 					{
-						label: "Stress",
+						label: "Stress Scenario",
 						data: stressData,
 						backgroundColor: "rgba(242, 176, 92, 0.8)",
 						borderRadius: 8
@@ -261,13 +266,40 @@ function upsertScenarioChart(baseCase, stressCase) {
 				responsive: true,
 				maintainAspectRatio: false,
 				plugins: {
-					legend: { position: "bottom" }
+					title: {
+						display: true,
+						text: "Base vs Stress Return Comparison"
+					},
+					legend: {
+						position: "bottom",
+						labels: {
+							usePointStyle: true,
+							boxWidth: 10,
+							padding: 14
+						}
+					},
+					tooltip: {
+						callbacks: {
+							label: (context) => `${context.dataset.label} (${context.label}): ${Number(context.raw).toFixed(2)}%`
+						}
+					}
 				},
 				scales: {
 					y: {
 						beginAtZero: true,
+						title: {
+							display: true,
+							text: "Return (%)"
+						},
 						ticks: {
+							stepSize: 5,
 							callback: (value) => `${value}%`
+						}
+					},
+					x: {
+						ticks: {
+							maxRotation: 0,
+							minRotation: 0
 						}
 					}
 				}
@@ -294,6 +326,8 @@ function mortgagePayment(principal, annualRate, years = 30) {
 
 function buildModel(market) {
 	const listingPrice = safeNumber(el.listingPrice.value, 350000);
+	const enteredMonthlyRent = safeNumber(el.optionalMonthlyRent.value, 0);
+	const hasMonthlyRentOverride = enteredMonthlyRent > 0;
 	const expenseRatio = clamp(safeNumber(el.expenseRatio.value, 35) / 100, 0, 1);
 	const downPaymentRatio = clamp(safeNumber(el.downPayment.value, 25) / 100, 0, 1);
 	const interestRate = clamp(safeNumber(el.interestRate.value, 6.8) / 100, 0, 0.3);
@@ -305,7 +339,7 @@ function buildModel(market) {
 	const zori = market.zori ?? 0;
 	const zhvfPct = market.zhvf ?? 0;
 
-	let monthlyRent = zori;
+	let monthlyRent = hasMonthlyRentOverride ? enteredMonthlyRent : zori;
 	if (stressOn) {
 		monthlyRent *= (1 - rentShock);
 	}
@@ -352,6 +386,7 @@ function buildModel(market) {
 		valuationScore,
 		incomeScore,
 		riskScore,
+		rentSource: hasMonthlyRentOverride ? "User rent input" : "Metro ZORI benchmark",
 		discountPct,
 		riskText: `Inventory ${market.inventory?.toFixed(0) ?? "--"} | Days Pending ${market.pending?.toFixed(1) ?? "--"}`
 	};
@@ -408,6 +443,7 @@ function syncStressInputs() {
 
 function resetInputs() {
 	el.listingPrice.value = DEFAULTS.listingPrice;
+	el.optionalMonthlyRent.value = DEFAULTS.optionalMonthlyRent;
 	el.expenseRatio.value = DEFAULTS.expenseRatio;
 	el.downPayment.value = DEFAULTS.downPayment;
 	el.interestRate.value = DEFAULTS.interestRate;
@@ -475,11 +511,18 @@ function render() {
 	el.cocOut.textContent = percent(output.cashOnCash, 2);
 	el.irrOut.textContent = `${percent(output.irrLow, 1)} to ${percent(output.irrHigh, 1)}`;
 	el.rentOut.textContent = currency(output.monthlyRent);
+	el.rentSourceOut.textContent = `Source: ${output.rentSource}${el.stressToggle.checked ? " | Stress-adjusted" : ""}`;
 
 	el.zhviOut.textContent = currency(output.zhvi);
 	el.zoriOut.textContent = currency(output.zori);
 	el.zhvfOut.textContent = `${(output.zhvfPct ?? 0).toFixed(2)}%`;
 	el.marketRiskOut.textContent = output.riskText;
+	el.scenarioSnapshotPanel?.classList.toggle("is-stress-active", el.stressToggle.checked);
+	if (el.scenarioLiveStatus) {
+		el.scenarioLiveStatus.innerHTML = el.stressToggle.checked
+			? 'Main model mode: <span class="scenario-live-status-emphasis">Stress ON</span>.'
+			: "Main model mode: Stress OFF.";
+	}
 	updateScoreBreakdown(output);
 	upsertScenarioChart(baseCase, stressCase);
 }
@@ -490,6 +533,7 @@ function initInputs() {
 		el.marketSearch,
 		el.undervaluedOnly,
 		el.listingPrice,
+		el.optionalMonthlyRent,
 		el.expenseRatio,
 		el.downPayment,
 		el.interestRate,
